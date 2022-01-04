@@ -1,6 +1,5 @@
 #include <FastLED.h>
-#include <CircularBuffer.h>
-CircularBuffer<CRGB, 62> lights;
+
 #define LED_PIN     3
 #define NUM_LEDS    62
 CRGB leds[NUM_LEDS];
