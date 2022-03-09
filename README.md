@@ -10,6 +10,11 @@ Python libraries can be installed using pip
 (python -m pip install <filename>)
 
 
+  
+  
+  
+  
+  
 LIBRARIES NEEDED:
   
 (all but TFMINI.h can be found in the Arduino Library Manager)
