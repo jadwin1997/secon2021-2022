@@ -1,6 +1,6 @@
 # secon2021-2022
 
-This is the repo for the 2022 Mississippi State IEEE secon Hardware competiton
+This is the repo for the 2022 Mississippi State IEEE secon Hardware competiton.
 
 While most code is posted in the discord, it is organized much better here. 
 
