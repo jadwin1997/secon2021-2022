@@ -11,8 +11,12 @@ Python libraries can be installed using pip
 
 
 LIBRARIES NEEDED:
+  
 (all but TFMINI.h can be found in the Arduino Library Manager)
+  
 "Adafruit Motorshield v2"
+  
 "Adafruit PWM Servo Driver"
+  
 "TFMini" (https://github.com/opensensinglab/tfmini)
 
