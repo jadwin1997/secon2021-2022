@@ -17,7 +17,7 @@ Python libraries can be installed using pip
   
   <b>LIBRARIES NEEDED:</b>
   
-(all but TFMINI.h can be found in the Arduino Library Manager)
+(all but TFMini can be found in the Arduino Library Manager)
   
 "Adafruit Motorshield v2"
   
