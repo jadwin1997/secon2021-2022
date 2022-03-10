@@ -28,4 +28,7 @@ ARDUINO:
 "TFMini" (https://github.com/opensensinglab/tfmini)
 
 PYTHON:
+  
 "OPENCV"
+  
+Ex: "python3 -m pip install opencv-python"
