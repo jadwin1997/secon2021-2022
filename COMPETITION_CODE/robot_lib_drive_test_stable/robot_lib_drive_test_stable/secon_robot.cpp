@@ -204,6 +204,9 @@ int robot::maptovel(int in,int velocity){
   if(velocity > 255){
     velocity = 255;
   }
+  if(velocity<0){
+    velocity = 0;
+  }
   return map(in, 0, 255, 0, velocity);
   
 }
