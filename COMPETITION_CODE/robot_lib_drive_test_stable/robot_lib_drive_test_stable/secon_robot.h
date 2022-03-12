@@ -24,6 +24,7 @@ class robot
     void anglemove(float angle, int velocity);
     void calibrateSensors();
     int leftDistance();
+    int rearDistance();
     void updateGyro();
     void updateAngle();
     int serialTalk();
@@ -34,16 +35,17 @@ class robot
     void setCoordinates(int x, int y);
     void moveToCoordinates(int mode);
     void updateY();
-    int x_coordinate;
-    int y_coordinate;
+    void updateX();
+    int x_coordinate = 0;
+    int y_coordinate = 0;
     //int target_x;
     //int target_y;
-    float angle;
+    float Zangle;
     //const int stepsPerRevolution = 200;
     MPU6050 mpu;
     TFMini tfmini1;
     int p;
-    //TFMini tfmini2;
+    TFMini tfmini2;
     Servo belt;
     Servo shooter;
     Servo arm;
@@ -55,6 +57,7 @@ class robot
     Adafruit_DCMotor *motor3;
     Adafruit_DCMotor *motor4;
     SoftwareSerial portLidar{7, 8};
+    SoftwareSerial rearLidar{10, 9};
     int getZaccelOffset();
     int offset;
     //Stepper myStepper(stepsPerRevolution,3,4,5,6);
@@ -64,7 +67,7 @@ class robot
   
     
   private:
-  float maptovel(int in,int velocity);
+  int maptovel(int in,int velocity);
   int target_x;
   int target_y;
 
