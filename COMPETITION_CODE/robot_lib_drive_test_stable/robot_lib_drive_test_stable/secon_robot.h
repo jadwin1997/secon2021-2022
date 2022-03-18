@@ -1,3 +1,7 @@
+
+
+
+
 #ifndef robot_lib
 #define robot_lib
 
@@ -10,6 +14,7 @@
 #include "TFMini.h"
 #include <SoftwareSerial.h>
 #include <MPU6050.h>
+#include <SharpIR.h>
 //TFMini tfmini1;
 //TFMini tfmini2;
 
@@ -31,11 +36,13 @@ class robot
     int getZaccel();
     int16_t ax, ay, az;
     int16_t gx, gy, gz;
+    
     unsigned long timeOld;
     void setCoordinates(int x, int y);
-    void moveToCoordinates(int mode);
+    void moveToCoordinates(int mode, int x_tol = 2, int y_tol = 2);
     void updateY();
     void updateX();
+    void updateOffset();
     int x_coordinate = 0;
     int y_coordinate = 0;
     //int target_x;
@@ -59,7 +66,7 @@ class robot
     SoftwareSerial portLidar{7, 8};
     SoftwareSerial rearLidar{10, 9};
     int getZaccelOffset();
-    int offset;
+    int16_t offset;
     //Stepper myStepper(stepsPerRevolution,3,4,5,6);
     //float angle2 = 0.0;
     

@@ -1,7 +1,10 @@
 #include "Arduino.h"
 #include "secon_robot.h"
-
+ SharpIR rearSharp = SharpIR(0,20150);
+ SharpIR leftSharp = SharpIR(3,20150);
 robot::robot(){
+
+ 
   Zangle = 0.0;
   timeOld = micros();
   //Serial.println("moving...");
@@ -12,10 +15,11 @@ robot::robot(){
   motor2 = AFMS.getMotor(2);
   motor3 = AFMS.getMotor(3);
   motor4 = AFMS.getMotor(4);
-  p = 30;
+  p = 35.0;
   //portLidar.listen();
   
   /*
+   * 
    // Set the speed to start, from 0 (off) to 255 (max speed)
   motor1->setSpeed(150);
   motor1->run(FORWARD);
@@ -30,19 +34,28 @@ robot::robot(){
 }
 void robot::calibrateSensors(){
   //SoftwareSerial portLidar(7,8);
-  portLidar.begin(TFMINI_BAUDRATE);
-  rearLidar.begin(TFMINI_BAUDRATE);
-  tfmini2.begin(&rearLidar);
-  tfmini1.begin(&portLidar);
+  //portLidar.begin(TFMINI_BAUDRATE);
+  //rearLidar.begin(TFMINI_BAUDRATE);
+  //tfmini2.begin(&rearLidar);
+  //tfmini1.begin(&portLidar);
+
   mpu.initialize();
+  anglemove(0,0);
+  delay(1000);
   offset = getZaccelOffset();
+  delay(1000);
   updateY();
   updateX();
 }
 void robot::updateGyro(){
   mpu.getRotation(&gx, &gy, &gz);
 }
-
+void robot::updateOffset(){
+  anglemove(0,0);
+  delay(1000);
+  offset=getZaccelOffset();
+  delay(500);
+}
 int robot::getZaccel(){
   updateGyro();
   if(gz==0){
@@ -81,31 +94,28 @@ void robot::setCoordinates(int x, int y){
 }
 
 
-void robot::moveToCoordinates(int mode){
- portLidar.listen();
- updateGyro();
- updateAngle();
-  while(y_coordinate != target_y){
-   updateGyro();
- updateAngle();
+void robot::moveToCoordinates(int mode, int x_tol, int y_tol){
+
+
+  while(y_coordinate > target_y+y_tol || y_coordinate < target_y-y_tol ){
+  
+ 
     if(y_coordinate > target_y){
       anglemove(180,maptovel((y_coordinate-target_y)*p,mode));
     }
     else if(y_coordinate<target_y){
       anglemove(0,maptovel((target_y-y_coordinate)*p,mode));
     }
-   //delay(100);
+   delay(100);
    updateY();
    
-   Serial.print("Angle: ");
-   Serial.println(Zangle);  
+   Serial.print("Y: ");
+   Serial.println(y_coordinate);  
   }
   
-  rearLidar.listen();
-  while(x_coordinate != target_x){
-     updateGyro();
- updateAngle();
-    
+
+  while(x_coordinate > target_x+x_tol || x_coordinate < target_x-x_tol){
+
     if(x_coordinate > target_x){
       
       
@@ -115,13 +125,13 @@ void robot::moveToCoordinates(int mode){
     else if(x_coordinate<target_x){
       anglemove(90.0,maptovel((target_x-x_coordinate)*p,mode));
     }
-  //delay(100);
+  delay(100);
   updateX();
-  updateAngle();
+
    Serial.print("X: ");
    Serial.println(x_coordinate);
   }
-  
+  anglemove(90.0,0);
  
 }
 void robot::anglemove(float angle, int velocity){
@@ -139,10 +149,22 @@ void robot::anglemove(float angle, int velocity){
   }
   motor2->run(FORWARD);
   motor4->run(FORWARD);
-  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity+int(Zangle)));
-  motor2->setSpeed(maptovel(255, velocity-int(Zangle)));
-  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity-int(Zangle)));
-  motor4->setSpeed(maptovel(255, velocity+int(Zangle)));
+  
+  if(angle == 90){
+  
+  updateY();
+  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-(y_coordinate-target_y)*15));
+  motor2->setSpeed(maptovel(255, velocity+(y_coordinate-target_y)*15));
+  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+(y_coordinate-target_y)*15));
+  motor4->setSpeed(maptovel(255, velocity-(y_coordinate-target_y)*15));
+  }
+  else{
+  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity));
+  motor2->setSpeed(maptovel(255, velocity));
+  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity));
+  motor4->setSpeed(maptovel(255, velocity));
+  }
+  
   }
   ///NEED TO COMPLETE FOR OTHER QUADRANTS
   else if(angle <=180)
@@ -211,18 +233,27 @@ int robot::maptovel(int in,int velocity){
   
 }
 void robot::updateY(){
-  portLidar.listen();
+  //portLidar.listen
+   
   y_coordinate = leftDistance();
+  if(y_coordinate > 90){
+    y_coordinate = 90;
+  }
 }
 void robot::updateX(){
-  rearLidar.listen();
+
   x_coordinate = rearDistance();
+    if(x_coordinate > 203){
+    x_coordinate = 203;
+  }
+  
 }
 int robot::leftDistance(){
   
-  return tfmini1.getDistance();
+  return leftSharp.distance();
 }
 int robot::rearDistance(){
-  return tfmini2.getDistance();
+  //return tfmini2.getDistance();
+  return rearSharp.distance();
 }
 
