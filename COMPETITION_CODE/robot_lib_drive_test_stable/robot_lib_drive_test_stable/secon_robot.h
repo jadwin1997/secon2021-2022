@@ -18,8 +18,8 @@
 //TFMini tfmini1;
 //TFMini tfmini2;
 
-#define SERVOMIN_BELT 100  // This is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX_BELT  500 // This is the 'maximum' pulse length count (out of 4096)
+#define SERVOMIN_BELT 200  // This is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX_BELT  400 // This is the 'maximum' pulse length count (out of 4096)
 
 class robot
 {
@@ -32,6 +32,11 @@ class robot
     int rearDistance();
     void updateGyro();
     void updateAngle();
+    void driveBelt(bool state);
+    void Shoot(bool state);
+    void lift();
+    void moveCam(int camangle);
+    void move_arm(int armangle);
     int serialTalk();
     int getZaccel();
     int16_t ax, ay, az;
@@ -45,6 +50,7 @@ class robot
     void updateOffset();
     int x_coordinate = 0;
     int y_coordinate = 0;
+    int lidar_angle_p = 10;
     //int target_x;
     //int target_y;
     float Zangle;

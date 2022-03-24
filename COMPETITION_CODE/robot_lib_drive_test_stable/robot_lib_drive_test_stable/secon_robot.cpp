@@ -10,6 +10,7 @@ robot::robot(){
   //Serial.println("moving...");
   AFMS = Adafruit_MotorShield();
   pwm = Adafruit_PWMServoDriver();
+  
   //SoftwareSerial portLidar(8,7);
   motor1 = AFMS.getMotor(1);
   motor2 = AFMS.getMotor(2);
@@ -38,7 +39,13 @@ void robot::calibrateSensors(){
   //rearLidar.begin(TFMINI_BAUDRATE);
   //tfmini2.begin(&rearLidar);
   //tfmini1.begin(&portLidar);
-
+  pwm.begin();
+  // In theory the internal oscillator is 25MHz but it really isn't
+  // that precise. You can 'calibrate' by tweaking this number till
+  // you get the frequency you're expecting!
+  pwm.setOscillatorFrequency(27000000);  // The int.osc. is closer to 27MHz  
+  pwm.setPWMFreq(50);  // Analog servos run at ~50 Hz updates
+  
   mpu.initialize();
   anglemove(0,0);
   delay(1000);
@@ -76,7 +83,7 @@ int robot::getZaccelOffset(){
 void robot::updateAngle(){
   Zangle = ((gz-offset) / 131) * ((float)(micros() - timeOld) / 1000000)+Zangle;
   timeOld = micros();
-  //angle = angle + (millis()-timeOld)*getZaccel();
+  
 }
 int robot::serialTalk(){
  int x = 0; 
@@ -98,7 +105,7 @@ void robot::moveToCoordinates(int mode, int x_tol, int y_tol){
 
 
   while(y_coordinate > target_y+y_tol || y_coordinate < target_y-y_tol ){
-  
+  updateAngle();
  
     if(y_coordinate > target_y){
       anglemove(180,maptovel((y_coordinate-target_y)*p,mode));
@@ -115,7 +122,7 @@ void robot::moveToCoordinates(int mode, int x_tol, int y_tol){
   
 
   while(x_coordinate > target_x+x_tol || x_coordinate < target_x-x_tol){
-
+updateAngle();
     if(x_coordinate > target_x){
       
       
@@ -131,7 +138,7 @@ void robot::moveToCoordinates(int mode, int x_tol, int y_tol){
    Serial.print("X: ");
    Serial.println(x_coordinate);
   }
-  anglemove(90.0,0);
+  anglemove(180.,0);
  
 }
 void robot::anglemove(float angle, int velocity){
@@ -153,10 +160,11 @@ void robot::anglemove(float angle, int velocity){
   if(angle == 90){
   
   updateY();
-  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-(y_coordinate-target_y)*15));
-  motor2->setSpeed(maptovel(255, velocity+(y_coordinate-target_y)*15));
-  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+(y_coordinate-target_y)*15));
-  motor4->setSpeed(maptovel(255, velocity-(y_coordinate-target_y)*15));
+  
+  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-(y_coordinate-target_y)*lidar_angle_p));
+  motor2->setSpeed(maptovel(255, velocity+(y_coordinate-target_y)*lidar_angle_p));
+  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+(y_coordinate-target_y)*lidar_angle_p));
+  motor4->setSpeed(maptovel(255, velocity-(y_coordinate-target_y)*lidar_angle_p));
   }
   else{
   motor1->setSpeed(maptovel(abs(int(vel-255)), velocity));
@@ -180,6 +188,7 @@ void robot::anglemove(float angle, int velocity){
     motor2->run(BACKWARD);
     motor4->run(BACKWARD);
   }
+  
   motor1->setSpeed(maptovel(255, velocity));
   motor2->setSpeed(maptovel(abs(int(vel-255)),  velocity));
   motor3->setSpeed(maptovel(255,  velocity));
@@ -196,10 +205,22 @@ void robot::anglemove(float angle, int velocity){
     motor1->run(BACKWARD);
     motor3->run(BACKWARD);
     }
-    motor1->setSpeed(maptovel(abs(int(vel-255)), velocity));
+
+    if(angle == 270.0){
+  
+  updateY();
+  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-(y_coordinate-target_y)*lidar_angle_p));
+  motor2->setSpeed(maptovel(255, velocity+(y_coordinate-target_y)*lidar_angle_p));
+  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+(y_coordinate-target_y)*lidar_angle_p));
+  motor4->setSpeed(maptovel(255, velocity-(y_coordinate-target_y)*lidar_angle_p));
+  }
+  else{
+  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity));
   motor2->setSpeed(maptovel(255, velocity));
   motor3->setSpeed(maptovel(abs(int(vel-255)), velocity));
   motor4->setSpeed(maptovel(255, velocity));
+  }
+
     }
   else if(angle <= 360.0){
     float vel = (510.0/90.0)*(angle-270.0);
@@ -229,6 +250,12 @@ int robot::maptovel(int in,int velocity){
   if(velocity<0){
     velocity = 0;
   }
+  if(in <0){
+    in = 0;
+  }
+  if(in>255){
+    in = 255;
+  }
   return map(in, 0, 255, 0, velocity);
   
 }
@@ -249,11 +276,47 @@ void robot::updateX(){
   
 }
 int robot::leftDistance(){
-  
+                                                             
   return leftSharp.distance();
 }
 int robot::rearDistance(){
   //return tfmini2.getDistance();
   return rearSharp.distance();
 }
+
+void robot::driveBelt(bool state){
+  int pulselength = 0;
+  if(state){
+  pulselength = map(180, 0, 180, SERVOMIN_BELT, SERVOMAX_BELT);}
+  else{
+  pulselength = map(90, 0, 180, SERVOMIN_BELT, SERVOMAX_BELT);}
+  pwm.setPWM(0,0,pulselength);
+  //delay(msec);
+  //belt.write(90);
+}
+void robot::Shoot(bool state = LOW                                             ){
+  
+  if(state){
+  digitalWrite(10,HIGH);  
+  }
+  
+  else{
+  digitalWrite(10,LOW);
+  }
+}
+void robot::lift(){
+  
+}
+void robot::moveCam(int camangle){
+  int pulselength = map(camangle, 0, 180, SERVOMIN_BELT, SERVOMAX_BELT);
+  pwm.setPWM(3,0,pulselength);
+}
+
+void robot::move_arm(int armangle){
+  int pulselength = map(armangle, 0, 180, SERVOMIN_BELT, SERVOMAX_BELT);
+  pwm.setPWM(0,0,pulselength);
+  //delay(20);
+  //}
+}
+
 

@@ -1,4 +1,6 @@
+
 #include "secon_robot.h"
+
 robot robo;
 int starting_y;
 void setup() {
@@ -8,12 +10,14 @@ void setup() {
   robo.AFMS.begin();
   robo.calibrateSensors();
   starting_y = robo.y_coordinate;
-  robo.setCoordinates(21,20);
+  robo.setCoordinates(21,22);
+  pinMode(10,OUTPUT);
+  digitalWrite(10,LOW);
   //robo.portLidar.begin(TFMINI_BAUDRATE);
 }
 
 void loop() {
-  
+  robo.Shoot(LOW);
   // put your main code here, to run repeatedly:
   Serial.print("angle: ");
   Serial.print(robo.Zangle);
@@ -21,23 +25,33 @@ void loop() {
   Serial.print(robo.x_coordinate);
   Serial.print(" y: ");
   Serial.println(robo.y_coordinate);
+
   //robo.anglemove(90.0,0);
   
+  
+  robo.driveBelt(HIGH);
+  delay(1000);
+  robo.driveBelt(LOW);
   robo.moveToCoordinates(255);
-  delay(1000);
-  robo.setCoordinates(70,20);
+  robo.setCoordinates(70,23);
   robo.moveToCoordinates(100);
   delay(1000);
-  robo.setCoordinates(130, 20);
-  robo.moveToCoordinates(100);
+  robo.setCoordinates(203, 23);
+  robo.moveToCoordinates(230);
+  robo.Shoot(HIGH);
+  delay(1800);
+  robo.Shoot(LOW);
+  digitalWrite(10,LOW);
+  robo.setCoordinates(21,23);
+  robo.moveToCoordinates(230);
   delay(1000);
-  robo.setCoordinates(21,20);
+  robo.setCoordinates(21,23);
   robo.moveToCoordinates(200);
   delay(1000);
   robo.setCoordinates(21,starting_y);
   robo.moveToCoordinates(255);
   delay(2000);
-  robo.setCoordinates(21,20);
+  robo.setCoordinates(21,23);
 
 
 
