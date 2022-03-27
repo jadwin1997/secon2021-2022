@@ -113,7 +113,7 @@ void robot::moveToCoordinates(int mode, int x_tol, int y_tol){
     else if(y_coordinate<target_y){
       anglemove(0,maptovel((target_y-y_coordinate)*p,mode));
     }
-   delay(100);
+   delay(10);
    updateY();
    
    Serial.print("Y: ");
@@ -132,7 +132,7 @@ updateAngle();
     else if(x_coordinate<target_x){
       anglemove(90.0,maptovel((target_x-x_coordinate)*p,mode));
     }
-  delay(100);
+  delay(40);
   updateX();
 
    Serial.print("X: ");
@@ -142,6 +142,8 @@ updateAngle();
  
 }
 void robot::anglemove(float angle, int velocity){
+  timeNew = millis();
+  int y_error  = y_coordinate-target_y;
   if(angle>=360){
     angle = angle - 360.0;
   }
@@ -160,11 +162,11 @@ void robot::anglemove(float angle, int velocity){
   if(angle == 90){
   
   updateY();
-  
-  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-(y_coordinate-target_y)*lidar_angle_p));
-  motor2->setSpeed(maptovel(255, velocity+(y_coordinate-target_y)*lidar_angle_p));
-  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+(y_coordinate-target_y)*lidar_angle_p));
-  motor4->setSpeed(maptovel(255, velocity-(y_coordinate-target_y)*lidar_angle_p));
+  int pid = map((y_error*lidar_angle_p)+((lidar_angle_d*(y_error - y_error_last))/int(timeNew-timeLast)),0,255,0,velocity);
+  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-pid));
+  motor2->setSpeed(maptovel(255, velocity+pid));
+  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+pid));
+  motor4->setSpeed(maptovel(255, velocity-pid));
   }
   else{
   motor1->setSpeed(maptovel(abs(int(vel-255)), velocity));
@@ -240,7 +242,8 @@ void robot::anglemove(float angle, int velocity){
   motor4->setSpeed(maptovel(abs(int(vel-255)), velocity));
   }
     
-  
+  y_error_last = y_error;
+  timeLast = timeNew;
 }
 
 int robot::maptovel(int in,int velocity){
