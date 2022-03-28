@@ -15,7 +15,6 @@
 import cv2
 
 class Camera:
-    # constructor: sets default value of center_x
     def __init__(self):
         # default value of center_x
         self.center_x = -1
@@ -41,12 +40,9 @@ class Camera:
         [ESC] to exit the window.
     """
     def open_camera(self, width: int, fps: int, classifier: str, display: bool):
-        # load cascade file
         cascade = cv2.CascadeClassifier(classifier)
-        # open webcam
         cap = cv2.VideoCapture(0)
 
-        # set camera parameters
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         cap.set(cv2.CAP_PROP_FPS, fps)
 
@@ -61,7 +57,6 @@ class Camera:
             if not ret:
                 continue
 
-            # convert frame to grayscale
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             # get detected objects
@@ -77,7 +72,7 @@ class Camera:
             if targets == ():
                 self.center_x = -1
 
-            # display window if specified to
+            # display window
             if display == True:
                 cv2.imshow("test", img)
                 print(self.center_x)
