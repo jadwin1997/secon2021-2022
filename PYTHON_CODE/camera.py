@@ -60,7 +60,11 @@ class Camera:
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             # get detected objects
-            targets = cascade.detectMultiScale(gray, 1.1, 4)
+            try:
+                targets = cascade.detectMultiScale(gray, 1.1, 4)
+            except:
+                print("ERROR: That classifier could not be opened")
+                break
 
             # draw rectangles for every object if displaying and set center_x to the center of the object
             for(x, y, w, h) in targets:
@@ -82,6 +86,5 @@ class Camera:
             if k == 27:
                 break
         
-        # release feed
         cap.release()
         cv2.destroyAllWindows()
