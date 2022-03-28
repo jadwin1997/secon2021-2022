@@ -132,7 +132,7 @@ updateAngle();
     else if(x_coordinate<target_x){
       anglemove(90.0,maptovel((target_x-x_coordinate)*p,mode));
     }
-  delay(40);
+  delay(10);
   updateX();
 
    Serial.print("X: ");
@@ -144,6 +144,9 @@ updateAngle();
 void robot::anglemove(float angle, int velocity){
   timeNew = millis();
   int y_error  = y_coordinate-target_y;
+  int x_error = x_coordinate-target_x;
+  updateY();
+  updateX();
   if(angle>=360){
     angle = angle - 360.0;
   }
@@ -160,7 +163,6 @@ void robot::anglemove(float angle, int velocity){
   motor4->run(FORWARD);
   
   if(angle == 90){
-  
   updateY();
   int pid = map((y_error*lidar_angle_p)+((lidar_angle_d*(y_error - y_error_last))/int(timeNew-timeLast)),0,255,0,velocity);
   motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-pid));
@@ -168,7 +170,15 @@ void robot::anglemove(float angle, int velocity){
   motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+pid));
   motor4->setSpeed(maptovel(255, velocity-pid));
   }
+  else if(angle == 0){
+  int pid = map((x_error*lidar_angle_p)+((lidar_angle_d*(x_error - x_error_last))/int(timeNew-timeLast)),0,255,0,velocity);
+  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-pid));
+  motor2->setSpeed(maptovel(255, velocity-pid));
+  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+pid));
+  motor4->setSpeed(maptovel(255, velocity+pid));  
+  }
   else{
+  
   motor1->setSpeed(maptovel(abs(int(vel-255)), velocity));
   motor2->setSpeed(maptovel(255, velocity));
   motor3->setSpeed(maptovel(abs(int(vel-255)), velocity));
@@ -190,11 +200,18 @@ void robot::anglemove(float angle, int velocity){
     motor2->run(BACKWARD);
     motor4->run(BACKWARD);
   }
-  
-  motor1->setSpeed(maptovel(255, velocity));
-  motor2->setSpeed(maptovel(abs(int(vel-255)),  velocity));
-  motor3->setSpeed(maptovel(255,  velocity));
-  motor4->setSpeed(maptovel(abs(int(vel-255)), velocity));
+  if(angle == 180){
+  int pid = map((x_error*lidar_angle_p_2)+((lidar_angle_d_2*(x_error - x_error_last))/int(timeNew-timeLast)),0,255,0,velocity);
+  motor1->setSpeed(maptovel(255, velocity-pid));
+  motor2->setSpeed(maptovel(abs(int(vel-255)),  velocity-pid));
+  motor3->setSpeed(maptovel(255,  velocity+pid));
+  motor4->setSpeed(maptovel(abs(int(vel-255)), velocity+pid));}
+  else{
+  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity));
+  motor2->setSpeed(maptovel(255, velocity));
+  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity));
+  motor4->setSpeed(maptovel(255, velocity));   
+  }
     }
   else if(angle <= 270)
   {
@@ -243,6 +260,7 @@ void robot::anglemove(float angle, int velocity){
   }
     
   y_error_last = y_error;
+  x_error_last = x_error;
   timeLast = timeNew;
 }
 

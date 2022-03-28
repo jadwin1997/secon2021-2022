@@ -53,7 +53,12 @@ class robot
     //NEEDS TUNING
     int lidar_angle_p =15;
     int lidar_angle_d = 6000;
+
+    int lidar_angle_p_2 =8;
+    int lidar_angle_d_2 = 7000;
+    
     int y_error_last = 0;
+    int x_error_last = 0;
     unsigned long timeLast;
     unsigned long timeNew;
     //int target_x;

@@ -10,7 +10,7 @@ void setup() {
   robo.AFMS.begin();
   robo.calibrateSensors();
   starting_y = robo.y_coordinate-2;
-  robo.setCoordinates(21,21);
+  robo.setCoordinates(20,21);
   pinMode(10,OUTPUT);
   digitalWrite(10,LOW);
   //robo.portLidar.begin(TFMINI_BAUDRATE);
@@ -32,26 +32,26 @@ void loop() {
   robo.driveBelt(HIGH);
   delay(1000);
   robo.driveBelt(LOW);
-  robo.moveToCoordinates(255);
+  robo.moveToCoordinates(220);
   robo.setCoordinates(70,23);
   robo.moveToCoordinates(200);
   delay(1000);
   robo.setCoordinates(203, 23);
-  robo.moveToCoordinates(220);
+  robo.moveToCoordinates(190);
   robo.Shoot(HIGH);
   delay(1800);
   robo.Shoot(LOW);
   digitalWrite(10,LOW);
-  robo.setCoordinates(21,24);
+  robo.setCoordinates(20,24);
   robo.moveToCoordinates(230);
   delay(1000);
-  robo.setCoordinates(21,23);
+  robo.setCoordinates(20,23);
   robo.moveToCoordinates(200);
   delay(1000);
-  robo.setCoordinates(21,starting_y);
+  robo.setCoordinates(20,starting_y);
   robo.moveToCoordinates(255);
   delay(2000);
-  robo.setCoordinates(21,23);
+  robo.setCoordinates(20,23);
 
 
 
