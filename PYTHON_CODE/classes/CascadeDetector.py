@@ -1,5 +1,6 @@
 """
-    Defines the Camera class, which opens the onboard camera with a specified width and fps.
+    Defines the CascadeDetector class, which opens the onboard camera with a specified width and fps and
+    finds targets from a given classifier
 
     ---
 
@@ -14,7 +15,7 @@
 
 import cv2
 
-class Camera:
+class CascadeDetector:
     def __init__(self):
         # default value of center_x
         self.center_x = -1

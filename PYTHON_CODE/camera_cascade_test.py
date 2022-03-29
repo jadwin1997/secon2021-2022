@@ -1,12 +1,12 @@
 """
-    Simple script to test Camera class.
+    Simple script to test CascadeDetector class.
 """
 
-from camera import Camera
+from classes.CascadeDetector import CascadeDetector
 
 
 def main():
-    cam = Camera()
+    cam = CascadeDetector()
     cam.open_camera(640, 10, "CASCADES/net_cascade_v2_400_neg.xml", True)
 
 
