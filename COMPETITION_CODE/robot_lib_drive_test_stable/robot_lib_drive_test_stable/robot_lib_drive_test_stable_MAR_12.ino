@@ -4,8 +4,10 @@
 robot robo;
 int starting_y;
 void setup() {
+  
   //analogReference();
   Serial.begin(115200);
+  Serial.setTimeout(2000);
   // put your setup code here, to run once:
   robo.AFMS.begin();
   robo.calibrateSensors();
@@ -13,64 +15,88 @@ void setup() {
   robo.setCoordinates(20,21);
   pinMode(10,OUTPUT);
   digitalWrite(10,LOW);
+  pinMode(13,INPUT_PULLUP);
+  pinMode(12,INPUT_PULLUP);
   //robo.portLidar.begin(TFMINI_BAUDRATE);
 }
 
 void loop() {
-  robo.Shoot(LOW);
+  //digitalRead(13)&&
+  while(LOW&&robo.Serial_x==-1000){
+    robo.driveBelt(LOW);
+    robo.serialTalk();
+  }
+  digitalWrite(9,HIGH);
+  digitalWrite(8,LOW);
+  robo.load();
+  delay(1000);
+
+  robo.moveCam(10);
+  delay(1000);
+  robo.moveCam(90);
+  delay(1000);
+  robo.moveCam(170);
+  delay(1000);
+  robo.moveCam(13);
+  robo.moveCam(170);
+  
+  //while(digitalRead(13)){
+  //this how u lift 
+  robo.lift(-1);
+  delay(1000);
+  robo.lift(0);
+  //}
+  //while(1==1){
+  
+  //delay(100);
+  //}
+  //delay(1000);
+  robo.lift(0);
+  robo.lift(0);
+  //robo.Shoot();
+  //robo.move_arm(180);
+  delay(1000);
+  while(1){
+    //robo.load();
+    delay(1000);
+    robo.load();
+    //delay(1000);
+    //robo.load();
+  }
+  while(1==1){
+    //robo.lift(1);
+    //delay(1000);
+    //robo.lift(0);
+  //robo.Shoot();
   // put your main code here, to run repeatedly:
-  Serial.print("angle: ");
+ /* Serial.print("angle: ");
   Serial.print(robo.Zangle);
   Serial.print(" x: ");
   Serial.print(robo.x_coordinate);
   Serial.print(" y: ");
-  Serial.println(robo.y_coordinate);
+  Serial.println(robo.y_coordinate);*/
 
   //robo.anglemove(90.0,0);
   
-  
+  //Serial.flush();
+  /*
   robo.driveBelt(HIGH);
   delay(1000);
   robo.driveBelt(LOW);
+  delay(1000);
+  */
   robo.moveToCoordinates(220);
   robo.setCoordinates(70,23);
   robo.moveToCoordinates(200);
-  delay(1000);
-  robo.setCoordinates(203, 23);
-  robo.moveToCoordinates(190);
-  robo.Shoot(HIGH);
-  delay(1800);
-  robo.Shoot(LOW);
-  digitalWrite(10,LOW);
-  robo.setCoordinates(20,24);
-  robo.moveToCoordinates(230);
-  delay(1000);
-  robo.setCoordinates(20,23);
-  robo.moveToCoordinates(200);
-  delay(1000);
-  robo.setCoordinates(20,starting_y);
-  robo.moveToCoordinates(255);
-  delay(2000);
-  robo.setCoordinates(20,23);
-
-
-
   
-  //robo.anglemove(90.0,0);
-  
-  /*
-  robo.moveToCoordinates(1);
-  robo.setCoordinates(40,15);
-  robo.moveToCoordinates(1);
-  robo.setCoordinates(10,15);
-  robo.moveToCoordinates(1);
-  delay(10000);
-  //robo.anglemove(90.0,100);
-
-  Serial.println(robo.tfmini2.getRecentSignalStrength());*/
-  robo.updateGyro();
-  robo.updateAngle();
+  delay(1000);
+  //robo.pid_enable=LOW;
+  robo.setCoordinates(23,23);
+  //robo.pid_enable = HIGH ;
+  //robo.updateGyro();
+  //robo.updateAngle();
   robo.updateY();
   robo.updateX();
-  delay(50);
+  }
+  //delay(0);
 }

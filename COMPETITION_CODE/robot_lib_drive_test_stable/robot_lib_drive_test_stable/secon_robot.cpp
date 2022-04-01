@@ -2,13 +2,15 @@
 #include "secon_robot.h"
  SharpIR rearSharp = SharpIR(0,20150);
  SharpIR leftSharp = SharpIR(3,20150);
+ Stepper myStepper(200,2,3,4,5); 
+ //Stepper 
 robot::robot(){
-
- 
+  
+  myStepper.setSpeed(60);
   Zangle = 0.0;
   timeOld = micros();
   //Serial.println("moving...");
-  AFMS = Adafruit_MotorShield();
+  AFMS = Adafruit_MotorShield(0x61);
   pwm = Adafruit_PWMServoDriver();
   
   //SoftwareSerial portLidar(8,7);
@@ -24,7 +26,7 @@ robot::robot(){
    // Set the speed to start, from 0 (off) to 255 (max speed)
   motor1->setSpeed(150);
   motor1->run(FORWARD);
-  // turn on motor
+  // turn 
   motor1->run(RELEASE);
   //myservo.attach(9);
   motor2->run(BACKWARD);
@@ -39,6 +41,7 @@ void robot::calibrateSensors(){
   //rearLidar.begin(TFMINI_BAUDRATE);
   //tfmini2.begin(&rearLidar);
   //tfmini1.begin(&portLidar);
+  pinMode(13, INPUT_PULLUP);
   pwm.begin();
   // In theory the internal oscillator is 25MHz but it really isn't
   // that precise. You can 'calibrate' by tweaking this number till
@@ -47,6 +50,7 @@ void robot::calibrateSensors(){
   pwm.setPWMFreq(50);  // Analog servos run at ~50 Hz updates
   
   mpu.initialize();
+  
   anglemove(0,0);
   delay(1000);
   offset = getZaccelOffset();
@@ -86,13 +90,17 @@ void robot::updateAngle(){
   
 }
 int robot::serialTalk(){
- int x = 0; 
+  Serial.begin(115200);
   if(Serial.available()>0){
-    if(Serial.read() == "X"){
-     x = Serial.parseInt();
+    if(Serial.read() == 'x'){
+     Serial_x = Serial.parseInt();
     }
   }
-  return x;
+  else
+  //Serial.print("Serial: ");
+  //Serial.println(Serial_x);
+  Serial.end();
+  return Serial_x;
 }
 
 void robot::setCoordinates(int x, int y){
@@ -102,7 +110,7 @@ void robot::setCoordinates(int x, int y){
 
 
 void robot::moveToCoordinates(int mode, int x_tol, int y_tol){
-
+  Serial.flush();
 
   while(y_coordinate > target_y+y_tol || y_coordinate < target_y-y_tol ){
   updateAngle();
@@ -163,8 +171,15 @@ void robot::anglemove(float angle, int velocity){
   motor4->run(FORWARD);
   
   if(angle == 90){
+    serialTalk();
   updateY();
+  int pid = -(Serial_x - 50);;
+  /*if(pid_enable){
   int pid = map((y_error*lidar_angle_p)+((lidar_angle_d*(y_error - y_error_last))/int(timeNew-timeLast)),0,255,0,velocity);
+  }
+  else{
+  int pid = -(Serial_x - 50);
+  }*/
   motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-pid));
   motor2->setSpeed(maptovel(255, velocity+pid));
   motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+pid));
@@ -215,6 +230,7 @@ void robot::anglemove(float angle, int velocity){
     }
   else if(angle <= 270)
   {
+
   float vel = (510.0/90.0)*(angle-180.0);
   motor1->run(FORWARD);
   motor2->run(BACKWARD);
@@ -226,12 +242,13 @@ void robot::anglemove(float angle, int velocity){
     }
 
     if(angle == 270.0){
-  
+      serialTalk();
+      
   updateY();
-  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-(y_coordinate-target_y)*lidar_angle_p));
-  motor2->setSpeed(maptovel(255, velocity+(y_coordinate-target_y)*lidar_angle_p));
-  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+(y_coordinate-target_y)*lidar_angle_p));
-  motor4->setSpeed(maptovel(255, velocity-(y_coordinate-target_y)*lidar_angle_p));
+  motor1->setSpeed(maptovel(abs(int(vel-255)), velocity-(Serial_x - 50)));
+  motor2->setSpeed(maptovel(255, velocity+(Serial_x - 50)));
+  motor3->setSpeed(maptovel(abs(int(vel-255)), velocity+(Serial_x - 50)));
+  motor4->setSpeed(maptovel(255, velocity-(Serial_x - 50)));
   }
   else{
   motor1->setSpeed(maptovel(abs(int(vel-255)), velocity));
@@ -315,27 +332,44 @@ void robot::driveBelt(bool state){
   //delay(msec);
   //belt.write(90);
 }
-void robot::Shoot(bool state = LOW                                             ){
-  
-  if(state){
-  digitalWrite(10,HIGH);  
-  }
-  
-  else{
-  digitalWrite(10,LOW);
-  }
+void robot::load(){
+    while(digitalRead(13)){
+    digitalWrite(9,HIGH);
+    digitalWrite(8,LOW);
+    }
+    digitalWrite(9,LOW);
 }
-void robot::lift(){
+void robot::Shoot(){
+  while(digitalRead(13)){
+    digitalWrite(9,HIGH);
+    digitalWrite(8,LOW);
+    }
+    digitalWrite(9,LOW);
+    delay(250);
+    digitalWrite(9,HIGH);
+    delay(100); 
+    digitalWrite(9,LOW);   
+}
+void robot::lift(int dir){
+  if(dir == 1){
+   myStepper.step(200); 
+  }
+  else if(dir == -1){
+   myStepper.step(-200); 
+  }
+  else{
+   myStepper.step(0);
+  }
   
 }
 void robot::moveCam(int camangle){
-  int pulselength = map(camangle, 0, 180, SERVOMIN_BELT, SERVOMAX_BELT);
-  pwm.setPWM(3,0,pulselength);
+  int pulselength = map(camangle, 0, 180, 100, 500);
+  pwm.setPWM(14,0,pulselength);
 }
 
 void robot::move_arm(int armangle){
-  int pulselength = map(armangle, 0, 180, SERVOMIN_BELT, SERVOMAX_BELT);
-  pwm.setPWM(0,0,pulselength);
+  int pulselength = map(armangle, 0, 180, 100, 500);
+  pwm.setPWM(15,0,pulselength);
   //delay(20);
   //}
 }
