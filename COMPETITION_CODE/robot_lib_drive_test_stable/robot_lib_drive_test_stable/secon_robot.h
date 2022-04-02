@@ -56,8 +56,8 @@ class robot
     int lidar_angle_p =15;
     int lidar_angle_d = 6000;
     bool pid_enable = HIGH;
-    int lidar_angle_p_2 =8;
-    int lidar_angle_d_2 = 7000;
+    int lidar_angle_p_2 =4;
+    int lidar_angle_d_2 = 4000;
     int Serial_x=-1000;
     int y_error_last = 0;
     int x_error_last = 0;

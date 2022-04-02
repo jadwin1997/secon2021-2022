@@ -173,7 +173,7 @@ void robot::anglemove(float angle, int velocity){
   if(angle == 90){
     serialTalk();
   updateY();
-  int pid = -(Serial_x - 50);;
+  int pid = -(Serial_x - 45);
   /*if(pid_enable){
   int pid = map((y_error*lidar_angle_p)+((lidar_angle_d*(y_error - y_error_last))/int(timeNew-timeLast)),0,255,0,velocity);
   }

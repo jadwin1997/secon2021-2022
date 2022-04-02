@@ -12,7 +12,7 @@ void setup() {
   robo.AFMS.begin();
   robo.calibrateSensors();
   starting_y = robo.y_coordinate-2;
-  robo.setCoordinates(20,21);
+  robo.setCoordinates(18,30);
   pinMode(10,OUTPUT);
   digitalWrite(10,LOW);
   pinMode(13,INPUT_PULLUP);
@@ -21,6 +21,12 @@ void setup() {
 }
 
 void loop() {
+
+    while(robo.Serial_x==-1000){
+    robo.driveBelt(LOW);
+    robo.serialTalk();
+  }
+  /*
   //digitalRead(13)&&
   while(LOW&&robo.Serial_x==-1000){
     robo.driveBelt(LOW);
@@ -86,17 +92,37 @@ void loop() {
   delay(1000);
   */
   robo.moveToCoordinates(220);
+
+
+  delay(1000);
+  for(int x = 0; x < 80; x++){
+    robo.move_arm(x);
+    delay(40);
+  }
+  robo.anglemove(270.0,50);
+  delay(500);
+  robo.anglemove(270.0,0);
+  robo.driveBelt(HIGH);
+  for(int x = 80; x <130; x++){
+    robo.move_arm(x);
+    delay(40);
+  }
+  robo.driveBelt(LOW);
+    robo.setCoordinates(21,23);
+  robo.moveToCoordinates(200);
   robo.setCoordinates(70,23);
   robo.moveToCoordinates(200);
   
   delay(1000);
   //robo.pid_enable=LOW;
-  robo.setCoordinates(23,23);
+  robo.setCoordinates(21,23);
+  robo.moveToCoordinates(200);
+  robo.setCoordinates(21,30);
   //robo.pid_enable = HIGH ;
   //robo.updateGyro();
   //robo.updateAngle();
   robo.updateY();
   robo.updateX();
-  }
+  
   //delay(0);
 }
